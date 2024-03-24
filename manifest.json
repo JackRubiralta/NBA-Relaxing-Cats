@@ -1,0 +1,22 @@
+{
+  	"manifest_version": 3,
+  	"name": "NBA Video Replacer",
+  	"version": "1.0",
+  	"description": "Replaces NBA.com game videos with a cat video.",
+  	"permissions": ["activeTab"],
+  	"content_scripts": [
+    	{
+      		"matches": ["*://*.nba.com/*"],
+      		"js": ["content.js"]
+		}
+  	],
+  	"web_accessible_resources": [
+    	{
+      		"resources": ["cat_video.mp4"],
+      		"matches": ["<all_urls>"]
+    	}
+  	],
+  	"icons": {
+    	"48": "icon.png"
+  	}
+}
