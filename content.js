@@ -32,9 +32,20 @@ async function findGameStatus(gameId) {
         console.error("There was an error fetching the game data:", error);
     }
 }
-const videoContainerSelector = 'div.sc-kFuwaP.bBWia';
 
-const GAME_ID = '0022301020'; // Example game ID
+
+
+// This function extracts the game ID from the NBA game page URL
+function extractGameIdFromURL() {
+    const gameIdPattern = /\/game\/[a-z\-]+(\d{10})/i;
+    const match = window.location.href.match(gameIdPattern);
+    return match ? match[1] : null;
+}
+
+const GAME_ID = extractGameIdFromURL();
+console.log(`Game ID: ${GAME_ID}`);
+
+const videoContainerSelector = 'div.sc-kFuwaP.bBWia';
 let videoMode = 'game'; // Tracks the current video mode (game or break)
 let gameVideoHTML; // To store the game's video HTML
 function checkAndUpdateVideo() {
@@ -46,20 +57,26 @@ function checkAndUpdateVideo() {
 
         if (videoMode === 'game' && (gameStatus === "Final" || gameStatus === "Halftime" || gameStatus === "Timeout")) {
             console.log("Game has paused. Switching to break video.");
+            console.log(`Status: ${game.gameStatusText}`);
+
             videoMode = 'break';
             gameVideoHTML = videoContainerDiv.innerHTML;
             videoContainerDiv.innerHTML = `<video autoplay loop name="media" style="width:100%;"><source src="${chrome.runtime.getURL('cat_video.mp4')}" type="video/mp4"></video>`; // Your break video HTML
         } else if (videoMode === 'break') { // removed && !(gameStatus === "Final" || gameStatus === "Halftime" || gameStatus === "Timeout")
             console.log("Game is back. Restoring game video.");
+            console.log(`Status: ${game.gameStatusText}`);
             videoMode = 'game';
             videoContainerDiv.innerHTML = gameVideoHTML; // Restore the original game video HTML
         }
-        
+
     }, 1000); // Check every second (1000 ms)
 }
 
 // Start the check-and-update process after a 5-second delay
 (async () => {
-    await new Promise(r => setTimeout(r, 5000));
-    checkAndUpdateVideo();
+    for (let i = 0; i < 10; i++) {
+        await new Promise(r => setTimeout(r, 2000));
+        checkAndUpdateVideo();
+    }
+    console.log("Error: videoContainerDiv not found")
 })();
