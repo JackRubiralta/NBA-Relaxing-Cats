@@ -54,17 +54,18 @@ function checkAndUpdateVideo() {
         if (!videoContainerDiv) return; // Exit if the container is not found
 
         const gameStatus = await findGameStatus(GAME_ID);
-
-        if (videoMode === 'game' && (gameStatus === "Final" || gameStatus === "Halftime" || gameStatus === "Timeout")) {
+        
+        const isBreakTime = ["Final", "Halftime", "Timeout"].includes(gameStatus);
+        if (videoMode === 'game' && isBreakTime) {
             console.log("Game has paused. Switching to break video.");
-            console.log(`Status: ${game.gameStatusText}`);
+            console.log(`Status: ${gameStatus}`);
 
             videoMode = 'break';
             gameVideoHTML = videoContainerDiv.innerHTML;
             videoContainerDiv.innerHTML = `<video autoplay loop name="media" style="width:100%;"><source src="${chrome.runtime.getURL('cat_video.mp4')}" type="video/mp4"></video>`; // Your break video HTML
-        } else if (videoMode === 'break') { // removed && !(gameStatus === "Final" || gameStatus === "Halftime" || gameStatus === "Timeout")
+        } else if (videoMode === 'break' && !isBreakTime) { // removed 
             console.log("Game is back. Restoring game video.");
-            console.log(`Status: ${game.gameStatusText}`);
+            console.log(`Status: ${gameStatus}`);
             videoMode = 'game';
             videoContainerDiv.innerHTML = gameVideoHTML; // Restore the original game video HTML
         }
